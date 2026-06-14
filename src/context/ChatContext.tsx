@@ -25,6 +25,8 @@ interface ChatContextType {
   logout: () => Promise<void>
   fetchChats: () => Promise<void>
   sessionId: string
+  isSettingsOpen: boolean
+  setIsSettingsOpen: (open: boolean) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -35,6 +37,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [sessionId, setSessionId] = useState<string>('')
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
@@ -265,6 +268,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         logout,
         fetchChats,
         sessionId,
+        isSettingsOpen,
+        setIsSettingsOpen,
       }}
     >
       {children}

@@ -1,9 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ChatProvider } from '@/context/ChatContext'
+import { ChatProvider, useChat } from '@/context/ChatContext'
 import Sidebar from '@/components/Sidebar'
+import SettingsModal from '@/components/SettingsModal'
 import { Menu, X } from 'lucide-react'
+
+function SettingsModalWrapper() {
+  const { isSettingsOpen, setIsSettingsOpen } = useChat()
+  if (!isSettingsOpen) return null
+  return <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+}
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -54,6 +61,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           </main>
         </div>
       </div>
+      <SettingsModalWrapper />
     </ChatProvider>
   )
 }

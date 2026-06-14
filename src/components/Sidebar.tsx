@@ -17,7 +17,6 @@ import {
   Loader2
 } from 'lucide-react'
 import Link from 'next/link'
-import SettingsModal from './SettingsModal'
 
 interface SidebarProps {
   onClose: () => void
@@ -34,13 +33,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
     deleteChat,
     renameChat,
     logout,
-    user
+    user,
+    isSettingsOpen,
+    setIsSettingsOpen
   } = useChat()
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [creating, setCreating] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const handleCreateChat = async () => {
     setCreating(true)
@@ -244,11 +244,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
           Log Out
         </button>
       </div>
-
-      {/* Settings Modal */}
-      {isSettingsOpen && (
-        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      )}
     </div>
   )
 }

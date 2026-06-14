@@ -77,7 +77,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             .eq('user_id', user.id)
 
           // Total Messages Count
-          // Note: Since messages are linked to chats, we fetch messages belonging to user's chats
           const { data: userChats } = await supabase
             .from('chats')
             .select('id')
@@ -146,90 +145,108 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-background/60 backdrop-blur-sm p-4 animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/70 backdrop-blur-md p-0 sm:p-6 md:p-10 animate-fade-in">
       <div className="absolute inset-0" onClick={onClose} />
       
-      <div className="bg-card border border-border shadow-2xl rounded-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative z-10">
+      <div className="bg-card border border-border/80 shadow-2xl w-full h-full sm:h-[85vh] sm:max-h-[750px] sm:max-w-4xl sm:rounded-2xl overflow-hidden flex flex-col relative z-10">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-          <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-base">Settings & Analytics</h2>
+        <div className="flex items-center justify-between border-b border-border/60 px-6 py-5 shrink-0 bg-card">
+          <div className="flex items-center gap-2.5">
+            <Settings className="w-5.5 h-5.5 text-primary" />
+            <h2 className="font-semibold text-lg tracking-tight">Settings & Analytics</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-muted text-muted-foreground transition-all cursor-pointer"
+            className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer border border-border/40"
+            title="Close Settings"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden min-h-[350px]">
+        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
           {/* Side tabs */}
-          <div className="w-1/3 border-r border-border/60 p-2 flex flex-col gap-1 bg-muted/20">
+          <div className="w-full sm:w-64 border-b sm:border-b-0 sm:border-r border-border/60 p-4 flex sm:flex-col gap-1.5 overflow-x-auto sm:overflow-x-visible shrink-0 bg-muted/5">
             <button
               onClick={() => setActiveTab('account')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs font-medium transition-all cursor-pointer ${
-                activeTab === 'account' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'account' 
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/10' 
+                  : 'hover:bg-muted/80 text-muted-foreground hover:text-foreground'
               }`}
             >
-              <User className="w-3.5 h-3.5" />
-              Account
+              <User className="w-4 h-4 shrink-0" />
+              <span>Account Profile</span>
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs font-medium transition-all cursor-pointer ${
-                activeTab === 'analytics' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'analytics' 
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/10' 
+                  : 'hover:bg-muted/80 text-muted-foreground hover:text-foreground'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
-              Analytics
+              <BarChart3 className="w-4 h-4 shrink-0" />
+              <span>Analytics & Telemetry</span>
             </button>
             <button
               onClick={() => setActiveTab('feedback')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs font-medium transition-all cursor-pointer ${
-                activeTab === 'feedback' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'feedback' 
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/10' 
+                  : 'hover:bg-muted/80 text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Heart className="w-3.5 h-3.5" />
-              Feedback
+              <Heart className="w-4 h-4 shrink-0" />
+              <span>Voluntary Feedback</span>
             </button>
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 p-5 overflow-y-auto">
+          <div className="flex-1 p-6 sm:p-8 overflow-y-auto bg-background/30">
             {activeTab === 'account' && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-6 animate-fade-in max-w-2xl">
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Account Profile</h3>
-                  <div className="p-3 bg-muted/30 border border-border rounded-xl space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">User ID</span>
-                      <span className="font-mono text-[10px] truncate max-w-[150px]">{user?.id}</span>
+                  <h3 className="text-base font-semibold text-foreground mb-1">Account Information</h3>
+                  <p className="text-xs text-muted-foreground mb-4">View your registered details and authorization details.</p>
+                  
+                  <div className="bg-card border border-border/80 rounded-2xl p-5 space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 py-3 border-b border-border/45 items-center">
+                      <span className="text-sm font-medium text-muted-foreground">User ID</span>
+                      <span className="sm:col-span-2 font-mono text-xs text-foreground bg-muted/65 p-2 rounded-lg border border-border/60 break-all select-all">
+                        {user?.id || 'Not authenticated'}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Email</span>
-                      <span className="font-medium">{user?.email}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 py-3 border-b border-border/45 items-center">
+                      <span className="text-sm font-medium text-muted-foreground">Email Address</span>
+                      <span className="sm:col-span-2 text-sm font-semibold text-foreground break-all select-all">
+                        {user?.email || 'Not authenticated'}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Registered At</span>
-                      <span>
-                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 py-3 items-center">
+                      <span className="text-sm font-medium text-muted-foreground">Registered Date</span>
+                      <span className="sm:col-span-2 text-sm text-foreground">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'N/A'}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Appearance</h3>
-                  <div className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-xl text-xs">
-                    <span className="text-muted-foreground">Theme Mode</span>
+                  <h3 className="text-base font-semibold text-foreground mb-1">Appearance Settings</h3>
+                  <p className="text-xs text-muted-foreground mb-4">Customize how the application looks to you.</p>
+                  
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-card border border-border/80 rounded-2xl gap-4 shadow-sm">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-foreground">Theme Mode</span>
+                      <span className="text-xs text-muted-foreground">Toggle between light and dark visual themes.</span>
+                    </div>
                     <button
                       onClick={toggleTheme}
-                      className="px-3 py-1 bg-background hover:bg-muted border border-border rounded-lg text-xs font-medium transition-all cursor-pointer"
+                      className="w-full sm:w-auto px-5 py-2.5 bg-background hover:bg-muted border border-border/80 hover:border-border rounded-xl text-sm font-semibold transition-all cursor-pointer shadow-sm select-none"
                     >
-                      {theme === 'light' ? 'Light Theme' : 'Dark Theme'}
+                      {theme === 'light' ? 'Switch to Dark Theme' : 'Switch to Light Theme'}
                     </button>
                   </div>
                 </div>
@@ -237,95 +254,109 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             )}
 
             {activeTab === 'analytics' && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold">Phase 1 Validation Telemetry</h3>
-                  <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">
+              <div className="space-y-6 animate-fade-in max-w-2xl">
+                <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Phase 1 Validation Telemetry</h3>
+                    <p className="text-xs text-muted-foreground">Metrics from your current active session and history.</p>
+                  </div>
+                  <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded-full font-semibold">
                     Live
                   </span>
                 </div>
 
                 {stats.loading ? (
-                  <div className="flex flex-col items-center justify-center py-10 gap-2">
-                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                    <span className="text-xs text-muted-foreground">Fetching telemetry data...</span>
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <span className="text-sm text-muted-foreground">Fetching telemetry data...</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 border border-border bg-muted/10 rounded-xl flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-semibold uppercase">Total Chats</span>
-                      <span className="text-xl font-bold mt-1 text-primary">{stats.chatCount}</span>
-                      <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-2">
-                        <FileText className="w-2.5 h-2.5" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-5 border border-border/80 bg-card rounded-2xl flex flex-col justify-between shadow-sm hover:border-primary/20 transition-all">
+                      <div>
+                        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total Chats</span>
+                        <span className="text-4xl font-bold mt-2 block text-primary">{stats.chatCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-6 pt-3 border-t border-border/40">
+                        <FileText className="w-4 h-4 text-primary/70" />
                         <span>Conversations saved</span>
                       </div>
                     </div>
 
-                    <div className="p-3 border border-border bg-muted/10 rounded-xl flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-semibold uppercase">Messages Sent</span>
-                      <span className="text-xl font-bold mt-1 text-primary">{stats.messageCount}</span>
-                      <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-2">
-                        <MessageCircle className="w-2.5 h-2.5" />
+                    <div className="p-5 border border-border/80 bg-card rounded-2xl flex flex-col justify-between shadow-sm hover:border-primary/20 transition-all">
+                      <div>
+                        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Messages Sent</span>
+                        <span className="text-4xl font-bold mt-2 block text-primary">{stats.messageCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-6 pt-3 border-t border-border/40">
+                        <MessageCircle className="w-4 h-4 text-primary/70" />
                         <span>User-companion turns</span>
                       </div>
                     </div>
 
-                    <div className="p-3 border border-border bg-muted/10 rounded-xl flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-semibold uppercase">Session Time</span>
-                      <span className="text-xl font-bold mt-1 text-primary">{formatDuration(sessionSeconds)}</span>
-                      <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-2">
-                        <Clock className="w-2.5 h-2.5" />
+                    <div className="p-5 border border-border/80 bg-card rounded-2xl flex flex-col justify-between shadow-sm hover:border-primary/20 transition-all">
+                      <div>
+                        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Session Time</span>
+                        <span className="text-4xl font-bold mt-2 block text-primary">{formatDuration(sessionSeconds)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-6 pt-3 border-t border-border/40">
+                        <Clock className="w-4 h-4 text-primary/70" />
                         <span>Current active window</span>
                       </div>
                     </div>
 
-                    <div className="p-3 border border-border bg-muted/10 rounded-xl flex flex-col">
-                      <span className="text-[10px] text-muted-foreground font-semibold uppercase">Feedback Logged</span>
-                      <span className="text-xl font-bold mt-1 text-primary">{stats.feedbackCount}</span>
-                      <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-2">
-                        <Heart className="w-2.5 h-2.5 fill-primary/10 text-primary" />
-                        <span>Voluntary feedback</span>
+                    <div className="p-5 border border-border/80 bg-card rounded-2xl flex flex-col justify-between shadow-sm hover:border-primary/20 transition-all">
+                      <div>
+                        <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Feedback Logged</span>
+                        <span className="text-4xl font-bold mt-2 block text-primary">{stats.feedbackCount}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-6 pt-3 border-t border-border/40">
+                        <Heart className="w-4 h-4 fill-primary/10 text-primary" />
+                        <span>Voluntary feedback entries</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="text-[10px] text-muted-foreground leading-relaxed p-3 bg-accent/20 rounded-xl border border-primary/10 flex gap-2">
-                  <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div className="text-xs text-muted-foreground leading-relaxed p-4 bg-primary/5 rounded-2xl border border-primary/10 flex gap-3 shadow-inner">
+                  <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <span>
-                    Metrics like return rates, time-to-first-response, and chat counts are logged directly in the `analytics_events` table for product-market fit evaluation.
+                    Metrics such as return rates, session duration, and response counts are securely saved to the validation system to evaluate product-market fit. No chat message content is analyzed for metrics.
                   </span>
                 </div>
               </div>
             )}
 
             {activeTab === 'feedback' && (
-              <div className="space-y-4 animate-fade-in">
-                <h3 className="text-sm font-semibold mb-1">Voluntary Feedback</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  How does chatting with Saathi feel? We want to know if conversations feel comforting, if the companion feels warm, and if you would return.
-                </p>
+              <div className="space-y-6 animate-fade-in max-w-2xl">
+                <div>
+                  <h3 className="text-base font-semibold text-foreground mb-1">Voluntary Feedback</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Help us shape Saathi. Tell us if your companion feels comforting and matches your expectations.
+                  </p>
+                </div>
 
                 {feedbackSuccess ? (
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center space-y-1 animate-fade-in">
-                    <Heart className="w-6 h-6 fill-emerald-500/20 mx-auto text-emerald-500" />
-                    <p className="font-semibold text-sm">Thank you for your feedback!</p>
-                    <p>It has been securely stored in the validation database.</p>
+                  <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium text-center space-y-2 animate-fade-in shadow-sm">
+                    <Heart className="w-8 h-8 fill-emerald-500/20 mx-auto text-emerald-500 animate-pulse" />
+                    <p className="font-bold text-base">Feedback Saved!</p>
+                    <p className="text-xs text-muted-foreground/80">Thank you for helping us validate the Companion system. It has been successfully saved in our metrics database.</p>
                   </div>
                 ) : (
-                  <form onSubmit={handleFeedbackSubmit} className="space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-muted-foreground">Rating</label>
-                      <div className="flex items-center gap-1 mt-1">
+                  <form onSubmit={handleFeedbackSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Rating</label>
+                      <p className="text-xs text-muted-foreground">How helpful or comforting has the companion been today?</p>
+                      <div className="flex items-center gap-2 mt-2">
                         {[1, 2, 3, 4, 5].map((stars) => (
                           <button
                             key={stars}
                             type="button"
                             onClick={() => setRating(stars)}
-                            className="p-1 rounded hover:scale-110 transition-transform cursor-pointer"
+                            className="p-1 rounded-lg hover:scale-110 transition-transform cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20"
                           >
                             <Heart
-                              className={`w-6 h-6 ${
+                              className={`w-8 h-8 transition-all ${
                                 stars <= rating
                                   ? 'fill-primary text-primary'
                                   : 'text-muted-foreground/30'
@@ -336,31 +367,31 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-muted-foreground" htmlFor="comment">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground" htmlFor="comment">
                         Tell us more (optional)
                       </label>
                       <textarea
                         id="comment"
-                        rows={3}
-                        placeholder="Does this feel different from normal AI? Do you feel heard? Let us know."
+                        rows={5}
+                        placeholder="What did you like? What was missing? Does talking to Saathi feel different or comforting?"
                         value={feedbackText}
                         onChange={(e) => setFeedbackText(e.target.value)}
-                        className="w-full text-xs p-3 rounded-xl border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                        className="w-full text-sm p-4 rounded-2xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none shadow-sm"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={submittingFeedback}
-                      className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-primary text-primary-foreground font-medium text-xs hover:opacity-90 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-95 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-md shadow-primary/20"
                     >
                       {submittingFeedback ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <Send className="w-3.5 h-3.5" />
+                        <Send className="w-4 h-4" />
                       )}
-                      Submit Feedback
+                      <span>Submit Voluntary Feedback</span>
                     </button>
                   </form>
                 )}
