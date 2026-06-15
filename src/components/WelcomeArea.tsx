@@ -41,6 +41,34 @@ export default function WelcomeArea() {
   const router = useRouter()
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null)
 
+  const getFirstName = () => {
+    if (!user) return 'Friend'
+    
+    // Check Supabase/Google user metadata fields
+    const meta = user.user_metadata || {}
+    const nameCandidate = meta.first_name || meta.given_name || meta.full_name || meta.name
+    
+    if (nameCandidate && typeof nameCandidate === 'string') {
+      const firstName = nameCandidate.split(' ')[0].trim()
+      if (firstName) {
+        return firstName.charAt(0).toUpperCase() + firstName.slice(1)
+      }
+    }
+    
+    // Fallback to email address username
+    if (user.email && typeof user.email === 'string') {
+      const emailName = user.email.split('@')[0]
+      const cleanEmailName = emailName.split(/[\._-]/)[0]
+      if (cleanEmailName) {
+        return cleanEmailName.charAt(0).toUpperCase() + cleanEmailName.slice(1)
+      }
+    }
+    
+    return 'Friend'
+  }
+
+  const firstName = getFirstName()
+
   const handleSuggestionClick = async (suggestion: typeof SUGGESTIONS[0]) => {
     if (selectedPrompt) return // Avoid double clicks
     setSelectedPrompt(suggestion.prompt)
@@ -77,10 +105,10 @@ export default function WelcomeArea() {
 
       {/* Welcoming Header */}
       <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-        How are you holding up today?
+        Hello, {firstName}!
       </h2>
       <p className="mt-2 text-sm text-muted-foreground max-w-md">
-        Saathi is here to listen and support you. Choose a prompt below to start a conversations, or write your own thoughts.
+        How can I help you today, {firstName}?
       </p>
 
       {/* Suggested Prompts Cards Grid */}
