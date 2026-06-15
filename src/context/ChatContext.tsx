@@ -27,6 +27,8 @@ interface ChatContextType {
   sessionId: string
   isSettingsOpen: boolean
   setIsSettingsOpen: (open: boolean) => void
+  desktopSidebarOpen: boolean
+  setDesktopSidebarOpen: (open: boolean) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -38,6 +40,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [sessionId, setSessionId] = useState<string>('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true)
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
@@ -45,10 +48,69 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Track the active chat ID from the URL params if present
   const activeChatId = (params?.id as string) || null
 
-  // Generate a unique session ID for session metrics
+  // Generate a unique session ID for session metrics and persist in sessionStorage
   useEffect(() => {
-    setSessionId(Math.random().toString(36).substring(2, 15))
+    let savedSessionId = sessionStorage.getItem('saathi_session_id')
+    if (!savedSessionId) {
+      savedSessionId = Math.random().toString(36).substring(2, 15)
+      sessionStorage.setItem('saathi_session_id', savedSessionId)
+    }
+    setSessionId(savedSessionId)
   }, [])
+
+  // Persistently track session duration in database (heartbeat upsert every 10 seconds)
+  useEffect(() => {
+    if (!user || !sessionId) return
+
+    let elapsedSeconds = 0
+    
+    const registerSessionStart = async () => {
+      try {
+        const { data: existing } = await supabase
+          .from('user_sessions')
+          .select('duration_seconds')
+          .eq('session_id', sessionId)
+          .maybeSingle()
+
+        if (existing) {
+          elapsedSeconds = existing.duration_seconds || 0
+          await supabase.from('user_sessions').update({
+            last_active_at: new Date().toISOString()
+          }).eq('session_id', sessionId)
+        } else {
+          await supabase.from('user_sessions').insert({
+            user_id: user.id,
+            session_id: sessionId,
+            started_at: new Date().toISOString(),
+            last_active_at: new Date().toISOString(),
+            duration_seconds: 0
+          })
+        }
+      } catch (err) {
+        console.error('Failed to register or retrieve session start:', err)
+      }
+    }
+
+    registerSessionStart()
+
+    const interval = setInterval(async () => {
+      elapsedSeconds += 10
+      try {
+        await supabase.from('user_sessions').upsert({
+          user_id: user.id,
+          session_id: sessionId,
+          last_active_at: new Date().toISOString(),
+          duration_seconds: elapsedSeconds
+        }, {
+          onConflict: 'session_id'
+        })
+      } catch (err) {
+        console.error('Failed to update session duration:', err)
+      }
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [user, sessionId])
 
   // Initialize theme from localStorage or system preferences
   useEffect(() => {
@@ -284,6 +346,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         sessionId,
         isSettingsOpen,
         setIsSettingsOpen,
+        desktopSidebarOpen,
+        setDesktopSidebarOpen,
       }}
     >
       {children}

@@ -29,7 +29,7 @@ export default function ChatSessionPage() {
   const chatId = id as string
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { fetchChats, user, sessionId } = useChat()
+  const { fetchChats, user, sessionId, desktopSidebarOpen } = useChat()
   const supabase = createClient()
 
   // State
@@ -415,7 +415,7 @@ export default function ChatSessionPage() {
     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-background">
       {/* Dynamic Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-card/20 backdrop-blur-md z-10">
-        <div className="flex flex-col">
+        <div className={`flex flex-col ${!desktopSidebarOpen ? 'md:pl-10' : ''} transition-all duration-200`}>
           <h2 className="font-semibold text-sm tracking-tight text-foreground truncate max-w-[200px] sm:max-w-xs">
             {chatTitle}
           </h2>

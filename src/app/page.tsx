@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Heart, Mail, Lock, Loader2, Sparkles } from 'lucide-react'
+import { Heart, Mail, Lock, Loader2, Sparkles, User } from 'lucide-react'
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [age, setAge] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -56,11 +57,26 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
+        if (!age) {
+          setError('Please enter your age.')
+          setLoading(false)
+          return
+        }
+        const parsedAge = parseInt(age)
+        if (isNaN(parsedAge) || parsedAge <= 0 || parsedAge > 120) {
+          setError('Please enter a valid age.')
+          setLoading(false)
+          return
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              age: parsedAge
+            }
           },
         })
         if (error) throw error
@@ -116,10 +132,11 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-tr from-background via-background to-accent/10 relative overflow-hidden">
-      {/* Background soft blurs */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-rose-500/5 via-amber-500/5 to-violet-500/10 dark:from-rose-950/20 dark:via-amber-950/10 dark:to-violet-950/20 relative overflow-hidden">
+      {/* Glowing animated warm orbs to feel heart warming */}
+      <div className="absolute top-1/6 left-1/6 w-[450px] h-[450px] rounded-full bg-rose-400/20 dark:bg-rose-900/15 blur-3xl pointer-events-none animate-pulse duration-10000" />
+      <div className="absolute bottom-1/6 right-1/6 w-[550px] h-[550px] rounded-full bg-amber-300/15 dark:bg-amber-800/10 blur-3xl pointer-events-none animate-pulse duration-8000" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-violet-400/10 dark:bg-violet-950/10 blur-3xl pointer-events-none animate-pulse duration-12000" />
 
       <div className="w-full max-w-md animate-fade-in relative z-10">
         {/* Logo and Header */}
@@ -195,6 +212,28 @@ export default function AuthPage() {
                 />
               </div>
             </div>
+
+            {isSignUp && (
+              <div className="space-y-1 animate-fade-in">
+                <label className="text-xs font-medium text-muted-foreground" htmlFor="age">
+                  Age
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted-foreground/60" />
+                  <input
+                    id="age"
+                    type="number"
+                    min="1"
+                    max="120"
+                    placeholder="Enter your age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    required={isSignUp}
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"

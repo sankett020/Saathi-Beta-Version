@@ -83,3 +83,21 @@ create or replace trigger trigger_update_chats_updated_at
 before update on public.chats
 for each row
 execute function update_updated_at_column();
+
+-- User Sessions Table for persistent session tracking
+create table if not exists public.user_sessions (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  session_id text not null unique,
+  started_at timestamptz not null default now(),
+  last_active_at timestamptz not null default now(),
+  duration_seconds integer not null default 0
+);
+
+-- Row Level Security for User Sessions
+alter table public.user_sessions enable row level security;
+
+create policy "Users can perform all actions on their own sessions."
+  on public.user_sessions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
