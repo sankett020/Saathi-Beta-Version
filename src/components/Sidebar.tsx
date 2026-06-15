@@ -85,8 +85,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
     <div className="flex flex-col h-full bg-card/60 backdrop-blur-md border-r border-border/10 p-4">
       {/* Sidebar Header */}
       <div className="flex items-center gap-3 px-2 py-4 mb-2">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-black overflow-hidden shadow-sm p-1.5">
-          <img src="/logo.png" alt="Saathi Logo" className="w-full h-full object-contain" />
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-border overflow-hidden shadow-sm p-1.5">
+          <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
         </div>
         <Link href="/chat" onClick={onClose} className="font-semibold text-lg tracking-tight hover:text-primary transition-colors">
           Saathi
