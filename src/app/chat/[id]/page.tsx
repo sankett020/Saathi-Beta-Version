@@ -267,6 +267,33 @@ export default function ChatSessionPage() {
       await logEvent('stream_completed', { assistant_message_id: savedAssistantMsg?.id })
       await fetchChats() // Refresh sidebar ordering
 
+      // 6. Auto-generate title if this is a "New Chat"
+      if (chatTitle === 'New Chat') {
+        const firstLine = content.split('\n')[0].trim()
+        let newTitle = firstLine
+        const words = firstLine.split(/\s+/)
+        if (words.length > 6) {
+          newTitle = words.slice(0, 6).join(' ') + '...'
+        }
+        if (newTitle.length > 40) {
+          newTitle = newTitle.substring(0, 37) + '...'
+        }
+        
+        try {
+          const { error: renameError } = await supabase
+            .from('chats')
+            .update({ title: newTitle })
+            .eq('id', chatId)
+          
+          if (!renameError) {
+            setChatTitle(newTitle)
+            await fetchChats()
+          }
+        } catch (titleErr) {
+          console.error('Error auto-renaming chat:', titleErr)
+        }
+      }
+
     } catch (err: any) {
       console.error('Error during message sending:', err)
       setError(err.message || 'Something went wrong. Please try again.')
@@ -428,8 +455,8 @@ export default function ChatSessionPage() {
                 >
                   {/* Avatar left side for AI */}
                   {isAssistant && (
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
-                      <Heart className="w-4 h-4 fill-primary/10" />
+                    <div className="flex items-center justify-center w-8 h-8 shrink-0">
+                      <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
                     </div>
                   )}
 
@@ -497,8 +524,8 @@ export default function ChatSessionPage() {
             {/* Stream output display */}
             {streaming && streamContent && (
               <div className="flex gap-3 sm:gap-4 animate-fade-in justify-start">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <Heart className="w-4 h-4 fill-primary/10 animate-pulse text-primary" />
+                <div className="flex items-center justify-center w-8 h-8 shrink-0">
+                  <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain animate-pulse" />
                 </div>
                 <div className="flex flex-col max-w-[85%] sm:max-w-[75%] space-y-1.5">
                   <div className="px-4 py-3 rounded-2xl border border-border/80 bg-card text-foreground text-sm leading-relaxed">
@@ -511,8 +538,8 @@ export default function ChatSessionPage() {
             {/* Typing Indicator Bubble */}
             {streaming && !streamContent && (
               <div className="flex gap-3 sm:gap-4 animate-fade-in justify-start">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <Heart className="w-4 h-4 fill-primary/10 text-primary" />
+                <div className="flex items-center justify-center w-8 h-8 shrink-0">
+                  <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex items-center gap-1 px-4 py-3 bg-card border border-border/80 rounded-2xl h-9">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary/60 dot-1" />

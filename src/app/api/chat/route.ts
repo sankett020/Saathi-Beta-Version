@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
+export const runtime = 'edge'
+
 export async function POST(request: Request) {
   try {
     // 1. Authenticate user server-side for security
@@ -76,6 +78,7 @@ Follow these communication guidelines:
         'Content-Type': 'text/event-stream; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
       },
     })
   } catch (error: any) {
