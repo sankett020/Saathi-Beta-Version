@@ -14,7 +14,12 @@ import {
   Loader2,
   Sparkles,
   User,
-  AlertCircle
+  AlertCircle,
+  Compass,
+  Wind,
+  Smile,
+  BookOpen,
+  ArrowRight
 } from 'lucide-react'
 
 interface Message {
@@ -23,6 +28,44 @@ interface Message {
   content: string
   created_at?: string
 }
+
+const SUGGESTIONS = [
+  {
+    title: 'Reflect on my day',
+    description: 'Help me slow down and think about how today went.',
+    prompt: 'I want to reflect on my day today. Can you guide me through a simple reflection?',
+    icon: Compass,
+    color: 'text-indigo-500 bg-indigo-500/5 dark:bg-indigo-500/10 border-indigo-500/10'
+  },
+  {
+    title: 'Feeling overwhelmed',
+    description: 'I have a lot on my mind and need help centering myself.',
+    prompt: 'I am feeling a bit overwhelmed right now. Can we talk or do a quick centering exercise?',
+    icon: Wind,
+    color: 'text-sky-500 bg-sky-500/5 dark:bg-sky-500/10 border-sky-500/10'
+  },
+  {
+    title: 'Explore a goal',
+    description: 'Let\'s brainstorm ideas for a dream or goal I want to achieve.',
+    prompt: 'I want to brainstorm some steps for a goal I have in mind. Can you help me unpack it?',
+    icon: Sparkles,
+    color: 'text-amber-500 bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/10'
+  },
+  {
+    title: 'Safe space to vent',
+    description: 'I just need someone to listen to me express my feelings.',
+    prompt: 'I just need a safe space to vent about something. I\'d love for you to listen and support me.',
+    icon: Smile,
+    color: 'text-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/10'
+  },
+  {
+    title: 'Learn something new',
+    description: 'Let\'s discuss a complex topic in simple terms.',
+    prompt: 'Can you teach me something interesting today? Pick a cool concept and explain it simply.',
+    icon: BookOpen,
+    color: 'text-rose-500 bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/10'
+  }
+]
 
 export default function ChatSessionPage() {
   const { id } = useParams()
@@ -40,6 +83,35 @@ export default function ChatSessionPage() {
   const [streaming, setStreaming] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const getFirstName = () => {
+    if (!user) return 'Friend'
+    const meta = user.user_metadata || {}
+    const nameCandidate = meta.first_name || meta.given_name || meta.full_name || meta.name
+    if (nameCandidate && typeof nameCandidate === 'string') {
+      const firstName = nameCandidate.split(' ')[0].trim()
+      if (firstName) {
+        return firstName.charAt(0).toUpperCase() + firstName.slice(1)
+      }
+    }
+    if (user.email && typeof user.email === 'string') {
+      const emailName = user.email.split('@')[0]
+      const cleanEmailName = emailName.split(/[\._-]/)[0]
+      if (cleanEmailName) {
+        return cleanEmailName.charAt(0).toUpperCase() + cleanEmailName.slice(1)
+      }
+    }
+    return 'Friend'
+  }
+
+  const firstName = getFirstName()
+
+  const handleSuggestionClick = (promptText: string) => {
+    setInputValue(promptText)
+    setTimeout(() => {
+      handleSendMessage(promptText)
+    }, 150)
+  }
   
   // Streaming message buffer
   const [streamContent, setStreamContent] = useState('')
@@ -154,9 +226,7 @@ export default function ChatSessionPage() {
     const content = (textToSend || inputValue).trim()
     if (!content || streaming) return
 
-    if (!textToSend) {
-      setInputValue('')
-    }
+    setInputValue('')
     setError(null)
     setStreaming(true)
     setStreamContent('')
@@ -412,7 +482,7 @@ export default function ChatSessionPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-background">
+    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-transparent">
       {/* Dynamic Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-card/20 backdrop-blur-md z-10">
         <div className={`flex flex-col ${!desktopSidebarOpen ? 'md:pl-10' : ''} transition-all duration-200`}>
@@ -431,14 +501,46 @@ export default function ChatSessionPage() {
             <span className="text-xs text-muted-foreground">Loading your conversation...</span>
           </div>
         ) : messages.length === 0 && !streaming ? (
-          <div className="flex flex-col items-center justify-center h-full text-center max-w-sm mx-auto p-4 space-y-3">
-            <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10">
-              <Sparkles className="w-5 h-5" />
+          <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto p-4 space-y-8 animate-fade-in relative z-10 select-none my-auto h-full justify-self-center">
+            {/* Saathi Pulsing Logo */}
+            <div className="flex items-center justify-center w-14 h-14 animate-pulse duration-3000">
+              <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
             </div>
-            <p className="text-sm font-medium text-foreground">Welcome to your space.</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Saathi is here. Write down whatever is on your mind, whether it is a small thought, a worry, or something you want to celebrate.
-            </p>
+
+            {/* Welcoming Header */}
+            <div className="text-center">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Hello, {firstName}!
+              </h2>
+              <p className="mt-2 text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                How can I help you today? Select one of the ideas below to start chatting.
+              </p>
+            </div>
+
+            {/* Suggested Prompts Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              {SUGGESTIONS.map((suggestion) => {
+                const Icon = suggestion.icon
+                return (
+                  <button
+                    key={suggestion.title}
+                    onClick={() => handleSuggestionClick(suggestion.prompt)}
+                    className="group flex flex-col text-left p-4 rounded-2xl border border-border bg-card/40 hover:bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden cursor-pointer active:scale-98"
+                  >
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg border ${suggestion.color} mb-3 transition-colors`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-1 group-hover:text-primary transition-colors">
+                      {suggestion.title}
+                      <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </h4>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      {suggestion.description}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         ) : (
           <div className="max-w-3xl mx-auto space-y-6">

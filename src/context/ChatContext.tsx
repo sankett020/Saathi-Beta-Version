@@ -29,6 +29,8 @@ interface ChatContextType {
   setIsSettingsOpen: (open: boolean) => void
   desktopSidebarOpen: boolean
   setDesktopSidebarOpen: (open: boolean) => void
+  deleteConfirmId: string | null
+  setDeleteConfirmId: (id: string | null) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -41,6 +43,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string>('')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
@@ -348,6 +351,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         setIsSettingsOpen,
         desktopSidebarOpen,
         setDesktopSidebarOpen,
+        deleteConfirmId,
+        setDeleteConfirmId,
       }}
     >
       {children}
