@@ -81,25 +81,39 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const getUserAndChats = async () => {
       setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        // Try getting session from memory/local storage first (instant local check)
+        const { data: { session } } = await supabase.auth.getSession()
+        let currentUser = session?.user || null
 
-      if (user) {
-        // Fetch chats sorted by updated_at descending
-        const { data: chatsData, error } = await supabase
-          .from('chats')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false })
-
-        if (!error && chatsData) {
-          setChats(chatsData)
+        // Verify with server only if no local session exists
+        if (!currentUser) {
+          const { data: { user } } = await supabase.auth.getUser()
+          currentUser = user
         }
 
-        // Track session start
-        trackEvent('session_start', { email: user.email })
+        setUser(currentUser)
+
+        if (currentUser) {
+          // Fetch chats sorted by updated_at descending
+          const { data: chatsData, error } = await supabase
+            .from('chats')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('updated_at', { ascending: false })
+
+          if (!error && chatsData) {
+            setChats(chatsData)
+          }
+
+          // Track session start
+          trackEvent('session_start', { email: currentUser.email })
+        }
+      } catch (err) {
+        console.error('Error in getUserAndChats:', err)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     getUserAndChats()

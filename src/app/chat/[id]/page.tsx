@@ -73,28 +73,28 @@ export default function ChatSessionPage() {
       setLoadingHistory(true)
       setError(null)
       try {
-        // Fetch chat title
-        const { data: chatData, error: chatError } = await supabase
-          .from('chats')
-          .select('title')
-          .eq('id', chatId)
-          .single()
+        // Fetch chat title and message history in parallel
+        const [chatRes, msgRes] = await Promise.all([
+          supabase
+            .from('chats')
+            .select('title')
+            .eq('id', chatId)
+            .single(),
+          supabase
+            .from('messages')
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true })
+        ])
 
-        if (chatError) throw chatError
-        if (chatData) {
-          setChatTitle(chatData.title)
+        if (chatRes.error) throw chatRes.error
+        if (msgRes.error) throw msgRes.error
+
+        if (chatRes.data) {
+          setChatTitle(chatRes.data.title)
         }
-
-        // Fetch messages
-        const { data: msgData, error: msgError } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('chat_id', chatId)
-          .order('created_at', { ascending: true })
-
-        if (msgError) throw msgError
-        if (msgData) {
-          setMessages(msgData)
+        if (msgRes.data) {
+          setMessages(msgRes.data)
         }
       } catch (err: any) {
         console.error('Error fetching chat history:', err)
