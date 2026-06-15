@@ -71,7 +71,7 @@ export default function WelcomeArea() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
       {/* Saathi Pulsing Logo */}
-      <div className="flex items-center justify-center w-16 h-16 rounded-2.5xl border border-border mb-6 shadow-sm overflow-hidden animate-pulse duration-3000 p-3">
+      <div className="flex items-center justify-center w-16 h-16 mb-6 animate-pulse duration-3000">
         <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
       </div>
 

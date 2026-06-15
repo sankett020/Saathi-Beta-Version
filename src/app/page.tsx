@@ -124,7 +124,7 @@ export default function AuthPage() {
       <div className="w-full max-w-md animate-fade-in relative z-10">
         {/* Logo and Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="flex items-center justify-center w-14 h-14 rounded-2xl border border-border mb-4 shadow-sm overflow-hidden p-2.5">
+          <div className="flex items-center justify-center w-14 h-14 mb-4">
             <img src="/logo.png?v=2" alt="Saathi Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-primary bg-clip-text text-transparent">
