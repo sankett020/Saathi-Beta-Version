@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "Saathi - Your AI Companion",
   description: "A warm, empathetic AI companion designed to listen, understand, and support your emotional well-being.",
   keywords: ["AI companion", "empathy", "mental wellness", "comfort", "safe chat", "mindfulness"],
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +35,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" sizes="any" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
